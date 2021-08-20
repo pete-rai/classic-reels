@@ -8,7 +8,7 @@ I use these scripts to make content for my [Classic Reels](https://www.tiktok.co
 
 ### License
 
-This project is available under [the MIT license](https://github.com/pete-rai/p5js-bubbles/blob/master/LICENSE). _Please respect the terms of the license._
+This project is available under [the MIT license](https://github.com/pete-rai/classic-reels/blob/master/LICENSE). _Please respect the terms of the license._
 
 ### Karmaware
 
