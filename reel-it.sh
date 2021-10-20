@@ -21,6 +21,7 @@ MOVIE_MID_HEIGHT=605
 BORDER_COLOR="white"
 BORDER_SIZE=2
 BORDER_SIZE_FULL=$(expr $BORDER_SIZE + $BORDER_SIZE)
+MOVIE_INNER_WIDTH=$(expr $MOVIE_WIDTH - $BORDER_SIZE_FULL)
 MOVIE_LEFT=10
 TEXT_COLOUR="white"
 TITLE_TOP=1100
@@ -77,11 +78,11 @@ MOVIE_HEIGHT=$(bc -l <<< "$MOVIE_WIDTH / $size_x * $size_y")
 pos_y=$(bc -l <<< "$MOVIE_MID_HEIGHT - ($MOVIE_HEIGHT / 2)")
 pos_y=$(echo $pos_y | awk '{ print int($1 + 0.5) }')
 
-spoil_x=$(bc -l <<< "($MOVIE_WIDTH - $SPOILER_WIDTH) / 2")
-spoil_x=$(echo $spoil_x | awk '{ print int($1 + 0.5) }')
+spoiler_x=$(bc -l <<< "($MOVIE_WIDTH - $SPOILER_WIDTH) / 2")
+spoiler_x=$(echo $spoiler_x | awk '{ print int($1 + 0.5) }')
 
-spoil_y=$(bc -l <<< "($MOVIE_HEIGHT - $SPOILER_HEIGHT) / 2")
-spoil_y=$(echo $spoil_y | awk '{ print int($1 + 0.5) }')
+spoiler_y=$(bc -l <<< "($MOVIE_HEIGHT - $SPOILER_HEIGHT) / 2")
+spoiler_y=$(echo $spoiler_y | awk '{ print int($1 + 0.5) }')
 
 # --- start processing video
 
@@ -94,7 +95,7 @@ rm $output 2> /dev/null
 echo "  extracting..."
 ffmpeg     -i $input \
           -ss $from -t $time \
-       -lavfi "[0]scale= $MOVIE_WIDTH:-1[i]; \
+       -lavfi "[0]scale= $MOVIE_INNER_WIDTH:-1[i]; \
                [i]pad= w=$BORDER_SIZE_FULL+iw : h=$BORDER_SIZE_FULL+ih : x=$BORDER_SIZE : y=$BORDER_SIZE : color=$BORDER_COLOR; \
                 afade= t=out : st=$fade_point : d=$AUDIO_FADE_SECS" \
            -v error \
@@ -105,7 +106,7 @@ if [ "$warn" = true ]; then
    ffmpeg     -i $extract \
       -loop 1 -i $SPOILER \
      -lavfi "[1]format=yuva420p,fade=in:st=$SPOILER_IN:d=$SPOILER_FADE:alpha=1,fade=out:st=$SPOILER_OUT:d=$SPOILER_FADE:alpha=1[i]; \
-             [0][i]overlay=$spoil_x:$spoil_y:shortest=1" \
+             [0][i]overlay=$spoiler_x:$spoiler_y:shortest=1" \
        -c:a copy \
          -v error \
          -y $stamped
@@ -129,6 +130,7 @@ ffmpeg    -i $mounted \
              drawtext= x=(w-text_w)/2 : fontcolor=$TEXT_COLOUR : y=$DESC_1    : fontsize=$DESC_SIZE  : text='$txt1' : fontfile=./fonts/$DESC_FONT.ttf, \
              drawtext= x=(w-text_w)/2 : fontcolor=$TEXT_COLOUR : y=$DESC_2    : fontsize=$DESC_SIZE  : text='$txt2' : fontfile=./fonts/$DESC_FONT.ttf, \
              drawtext= x=(w-text_w)/2 : fontcolor=$TEXT_COLOUR : y=$DESC_3    : fontsize=$DESC_SIZE  : text='$txt3' : fontfile=./fonts/$DESC_FONT.ttf" \
+        -c:a copy \
           -v error \
           -y $output
 
